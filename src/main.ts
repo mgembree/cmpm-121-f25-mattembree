@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 /**
  * Main entry point for the CMPM 121 Section Activity
  * Simple starter template - customize to your heart's content!
