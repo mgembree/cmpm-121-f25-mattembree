@@ -1,8 +1,6 @@
 // deno-lint-ignore-file
+// Frog Clicker Game
 
-console.log("🎮 CMPM 121 - Starting...");
-
-// Simple counter for demonstration
 // deno-lint-ignore prefer-const
 let counter: number = 0;
 let frogps: number = 0;
@@ -16,54 +14,59 @@ document.body.innerHTML = `
     <p>🐸 Frogs: <span id="count">0</span> || Frogs Per Second 🐸: <span id="fps">0</span></p>
     <div class="button-container">
       <button id="increment">🪷 Click Me! 🪷</button>
-      <button id="auto-increment">👆 Frog Generator 👆</button>
+      <button id="upgrade" disabled>🚀 Buy Upgrade (Cost: 10 frogs) 🚀</button>
     </div>
   </div>
 `;
 
-// Add click handler
+// Button Handlers
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
-const autoButton = document.getElementById("auto-increment")!;
 const fpsElement = document.getElementById("fps")!;
+const upgradeButton = document.getElementById("upgrade")! as HTMLButtonElement;
 
-//Default Clicker Button
-button.addEventListener("click", () => {
-  counter++;
-  counterElement.textContent = counter.toString();
-});
-
-//Auto clicker Button
-autoButton.addEventListener("click", () => {
-  frogps++;
+// Function to update counters and buttons
+function updateDisplay() {
+  counterElement.textContent = counter.toFixed(2);
   fpsElement.textContent = frogps.toString();
-  
-  if (!animationId) {
-    lastTime = performance.now();
-    animationId = requestAnimationFrame(animate);
-  }
+  upgradeButton.disabled = counter < 10;
+}
 
-  /* Step 3 - Using setInterval
-  setInterval(() => {
-    counter++;
-    counterElement.textContent = counter.toString();
-  }, 1000);
-  */
-});
-
-// Step 4 - Animation function using requestAnimationFrame
+//Step 4 - Animation function using requestAnimationFrame
 function animate(currentTime: number) {
   if (frogps > 0) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
-    
+
     // Calculate increment based on time passed
-    // frogps = frogs per 1000ms
+    // frogps per second = frogps per 1000ms
     const increment = (frogps * deltaTime) / 1000;
     counter += increment;
-    
-    counterElement.textContent = counter.toFixed(2);
+
+    updateDisplay();
   }
-  
+
   animationId = requestAnimationFrame(animate);
 }
+
+//Step 5 - Auto clicker Upgrade Button
+upgradeButton.addEventListener("click", () => {
+  if (counter >= 10) {
+    counter -= 10;
+    frogps++;
+    updateDisplay();
+
+    if (!animationId) {
+      lastTime = performance.now();
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+});
+
+//Step 1|2 - Default Clicker Button
+button.addEventListener("click", () => {
+  counter++;
+  updateDisplay();
+});
+
+updateDisplay();
