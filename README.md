@@ -1,1 +1,4 @@
-# This program is for a button counter, and is the first section assignment completed for CMPM-121. I have made changes to make the button increment the counter variable and
+# This is a Clicker Game called Frog Clicker, 
+Includes buttons to increment the frog counter by clicking, as well as generating frogs by purchasing upgrades.
+Upgrades are frog-themed, with increasing price for each additional upgrade purchased. 
+
