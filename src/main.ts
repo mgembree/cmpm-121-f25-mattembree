@@ -30,14 +30,20 @@ document.body.innerHTML = `
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
 const fpsElement = document.getElementById("fps")!;
-const upgradeButtonA = document.getElementById("upgradeA")! as HTMLButtonElement;
-const upgradeButtonB = document.getElementById("upgradeB")! as HTMLButtonElement;
-const upgradeButtonC = document.getElementById("upgradeC")! as HTMLButtonElement;
+const upgradeButtonA = document.getElementById(
+  "upgradeA",
+)! as HTMLButtonElement;
+const upgradeButtonB = document.getElementById(
+  "upgradeB",
+)! as HTMLButtonElement;
+const upgradeButtonC = document.getElementById(
+  "upgradeC",
+)! as HTMLButtonElement;
 
 // Purchase counter elements
 const upgradeA_countElement = document.getElementById("countA")!;
 const upgradeB_countElement = document.getElementById("countB")!;
-const upgradeC_countElement = document.getElementById("countC")!;
+const upgradeC_countElement = document.getElementById("countC")!
 
 // Function to update counters and buttons
 function updateDisplay() {
