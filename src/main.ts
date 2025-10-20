@@ -7,15 +7,22 @@ let frogps: number = 0;
 let lastTime: number = 0;
 let animationId: number | null = null;
 
-// Purchase counters
-let upgradeA_count: number = 0;
-let upgradeB_count: number = 0;
-let upgradeC_count: number = 0;
+// Item interface
+interface Item {
+  name: string;
+  cost: number;
+  rate: number;
+  emoji: string;
+}
 
-// Base costs for upgrades
-const upgradeA_baseCost: number = 10;
-const upgradeB_baseCost: number = 100;
-const upgradeC_baseCost: number = 1000;
+const availableItems: Item[] = [
+  { name: "Lily Pad", cost: 10, rate: 0.1, emoji: "🪷" },
+  { name: "Bug Swarm", cost: 100, rate: 2, emoji: "🦟" },
+  { name: "Frog Pond", cost: 1000, rate: 50, emoji: "🏞️" },
+];
+
+const purchaseCounts: number[] = new Array(availableItems.length).fill(0);
+
 const priceIncreaseFactor: number = 1.15;
 
 // Add HTML structure with embedded CSS
@@ -131,7 +138,7 @@ document.body.innerHTML = `
     }
     
     /* Upgrade buttons */
-    button[id^="upgrade"] {
+    .upgrade-btn {
       font-size: 1.1rem;
       padding: 15px 25px;
       background: linear-gradient(45deg, #4682b4, #87ceeb);
@@ -148,48 +155,48 @@ document.body.innerHTML = `
       line-height: 1.4;
     }
     
-    button[id^="upgrade"]:hover:not(:disabled) {
+    .upgrade-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
       background: linear-gradient(45deg, #4169e1, #4682b4);
     }
     
-    button[id^="upgrade"]:active:not(:disabled) {
+    .upgrade-btn:active:not(:disabled) {
       transform: translateY(0);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     
-    button[id^="upgrade"]:disabled {
+    .upgrade-btn:disabled {
       background: linear-gradient(45deg, #999, #ccc);
       cursor: not-allowed;
       opacity: 0.6;
       border-color: #999;
     }
     
-    #upgradeA:not(:disabled) {
+    .upgrade-btn-0:not(:disabled) {
       background: linear-gradient(45deg, #ff69b4, #ffb6c1);
       border-color: #ff1493;
     }
     
-    #upgradeA:hover:not(:disabled) {
+    .upgrade-btn-0:hover:not(:disabled) {
       background: linear-gradient(45deg, #ff1493, #ff69b4);
     }
     
-    #upgradeB:not(:disabled) {
+    .upgrade-btn-1:not(:disabled) {
       background: linear-gradient(45deg, #8b4513, #daa520);
       border-color: #cd853f;
     }
     
-    #upgradeB:hover:not(:disabled) {
+    .upgrade-btn-1:hover:not(:disabled) {
       background: linear-gradient(45deg, #cd853f, #8b4513);
     }
     
-    #upgradeC:not(:disabled) {
+    .upgrade-btn-2:not(:disabled) {
       background: linear-gradient(45deg, #20b2aa, #48d1cc);
       border-color: #008b8b;
     }
     
-    #upgradeC:hover:not(:disabled) {
+    .upgrade-btn-2:hover:not(:disabled) {
       background: linear-gradient(45deg, #008b8b, #20b2aa);
     }
     
@@ -209,7 +216,7 @@ document.body.innerHTML = `
         padding: 15px;
       }
       
-      button[id^="upgrade"] {
+      .upgrade-btn {
         min-width: 250px;
         font-size: 1rem;
       }
@@ -230,10 +237,13 @@ document.body.innerHTML = `
     <p>🐸 Frogs: <span id="count">0</span> || Frogs Per Second: <span id="fps">0</span> 🐸</p>
     <div class="button-container">
       <button id="increment">🐸</button>
-      <button id="upgradeA" disabled>🪷 Buy Lily Pad (Cost: 10 Frogs) 🪷<br>Owned: <span id="countA">0</span></button>
-      <button id="upgradeB" disabled>🦟 Buy Bug Swarm (Cost: 100 Frogs) 🦟<br>Owned: <span id="countB">0</span></button>
-      <button id="upgradeC" disabled>🏞️ Buy Frog Pond (Cost: 1000 Frogs) 🏞️<br>Owned: <span id="countC">0</span></button>
-      </div>
+      ${availableItems.map((item, index) =>
+        `<button id="upgrade-${index}" class="upgrade-btn upgrade-btn-${index}" disabled>
+          ${item.emoji} Buy ${item.name} (Cost: ${item.cost} Frogs) ${item.emoji}<br>
+          Owned: <span id="count-${index}">0</span>
+        </button>`
+      ).join("")}
+    </div>
   </div>
 `;
 
@@ -241,20 +251,22 @@ document.body.innerHTML = `
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
 const fpsElement = document.getElementById("fps")!;
-const upgradeButtonA = document.getElementById(
-  "upgradeA",
-)! as HTMLButtonElement;
-const upgradeButtonB = document.getElementById(
-  "upgradeB",
-)! as HTMLButtonElement;
-const upgradeButtonC = document.getElementById(
-  "upgradeC",
-)! as HTMLButtonElement;
 
-// Purchase counter elements
-const upgradeA_countElement = document.getElementById("countA")!;
-const upgradeB_countElement = document.getElementById("countB")!;
-const upgradeC_countElement = document.getElementById("countC")!;
+// Get all upgrade buttons and count elements dynamically
+const upgradeButtons: HTMLButtonElement[] = [];
+const countElements: HTMLElement[] = [];
+
+for (let i = 0; i < availableItems.length; i++) {
+  upgradeButtons.push(
+    document.getElementById(`upgrade-${i}`)! as HTMLButtonElement,
+  );
+  countElements.push(document.getElementById(`count-${i}`)!);
+}
+
+// Dynamic pricing function
+function getUpgradeCost(baseCost: number, purchaseCount: number): number {
+  return Math.round(baseCost * Math.pow(priceIncreaseFactor, purchaseCount));
+}
 
 // Function to update counters and buttons
 function updateDisplay() {
@@ -262,30 +274,22 @@ function updateDisplay() {
   frogps = Math.round(frogps * 10) / 10; // Fix floating point precision
   fpsElement.textContent = frogps.toFixed(1);
 
-  // Update purchase counters
-  upgradeA_countElement.textContent = upgradeA_count.toString();
-  upgradeB_countElement.textContent = upgradeB_count.toString();
-  upgradeC_countElement.textContent = upgradeC_count.toString();
+  // Update all items using loop
+  for (let i = 0; i < availableItems.length; i++) {
+    const item = availableItems[i];
+    const purchaseCount = purchaseCounts[i];
+    const cost = getUpgradeCost(item.cost, purchaseCount);
 
-  const upgradeA_cost = getUpgradeCost(upgradeA_baseCost, upgradeA_count);
-  const upgradeB_cost = getUpgradeCost(upgradeB_baseCost, upgradeB_count);
-  const upgradeC_cost = getUpgradeCost(upgradeC_baseCost, upgradeC_count);
+    // Update purchase counter display
+    countElements[i].textContent = purchaseCount.toString();
 
-  upgradeButtonA.innerHTML =
-    `🪷 Buy Lily Pad (Cost: ${upgradeA_cost} Frogs) 🪷<br>Owned: <span id="countA">${upgradeA_count}</span>`;
-  upgradeButtonB.innerHTML =
-    `🦟 Buy Bug Swarm (Cost: ${upgradeB_cost} Frogs) 🦟<br>Owned: <span id="countB">${upgradeB_count}</span>`;
-  upgradeButtonC.innerHTML =
-    `🏞️ Buy Frog Pond (Cost: ${upgradeC_cost} Frogs) 🏞️<br>Owned: <span id="countC">${upgradeC_count}</span>`;
+    // Update button text with current cost
+    upgradeButtons[i].innerHTML =
+      `${item.emoji} Buy ${item.name} (Cost: ${cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${i}">${purchaseCount}</span>`;
 
-  upgradeButtonA.disabled = counter < upgradeA_cost;
-  upgradeButtonB.disabled = counter < upgradeB_cost;
-  upgradeButtonC.disabled = counter < upgradeC_cost;
-}
-
-//Step 7 - Dynamic pricing function
-function getUpgradeCost(baseCost: number, purchaseCount: number): number {
-  return Math.round(baseCost * Math.pow(priceIncreaseFactor, purchaseCount));
+    // Update button availability
+    upgradeButtons[i].disabled = counter < cost;
+  }
 }
 
 //Step 4 - Animation function using requestAnimationFrame
@@ -294,8 +298,6 @@ function animate(currentTime: number) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    // Calculate increment based on time passed
-    // frogps per second = frogps per 1000ms
     const increment = (frogps * deltaTime) / 1000;
     counter += increment;
 
@@ -305,52 +307,26 @@ function animate(currentTime: number) {
   animationId = requestAnimationFrame(animate);
 }
 
-//Step 5 - Auto clicker Upgrade Button
-//Step 6 - Generalize upgrade system -- 10 Frogs for 0.1 fps || 100 Frogs for 2 fps || 1000 Frogs for 50 fps
-upgradeButtonA.addEventListener("click", () => {
-  const cost = getUpgradeCost(upgradeA_baseCost, upgradeA_count);
-  if (counter >= cost) {
-    counter -= cost; //Fixed: uses the calculated cost
-    frogps += 0.1;
-    upgradeA_count++; // Increment purchase counter
-    updateDisplay();
+//Step 8 - Data-driven upgrade system using loops
+// Add event listeners for all upgrade buttons using loops
+for (let i = 0; i < availableItems.length; i++) {
+  upgradeButtons[i].addEventListener("click", () => {
+    const item = availableItems[i];
+    const cost = getUpgradeCost(item.cost, purchaseCounts[i]);
 
-    if (!animationId) {
-      lastTime = performance.now();
-      animationId = requestAnimationFrame(animate);
+    if (counter >= cost) {
+      counter -= cost;
+      frogps += item.rate;
+      purchaseCounts[i]++;
+      updateDisplay();
+
+      if (!animationId) {
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(animate);
+      }
     }
-  }
-});
-
-upgradeButtonB.addEventListener("click", () => {
-  const cost = getUpgradeCost(upgradeB_baseCost, upgradeB_count);
-  if (counter >= cost) {
-    counter -= cost;
-    frogps += 2;
-    upgradeB_count++;
-    updateDisplay();
-
-    if (!animationId) {
-      lastTime = performance.now();
-      animationId = requestAnimationFrame(animate);
-    }
-  }
-});
-
-upgradeButtonC.addEventListener("click", () => {
-  const cost = getUpgradeCost(upgradeC_baseCost, upgradeC_count);
-  if (counter >= cost) {
-    counter -= cost;
-    frogps += 50;
-    upgradeC_count++;
-    updateDisplay();
-
-    if (!animationId) {
-      lastTime = performance.now();
-      animationId = requestAnimationFrame(animate);
-    }
-  }
-});
+  });
+}
 
 //Step 1|2 - Default Clicker Button with animation
 button.addEventListener("click", () => {
