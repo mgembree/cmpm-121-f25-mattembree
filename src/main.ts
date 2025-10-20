@@ -237,7 +237,11 @@ document.body.innerHTML = `
     <p>🐸 Frogs: <span id="count">0</span> || Frogs Per Second: <span id="fps">0</span> 🐸</p>
     <div class="button-container">
       <button id="increment">🐸</button>
-      ${availableItems.map((item, index) => `<button id="upgrade-${index}" class="upgrade-btn upgrade-btn-${index}" disabled>${item.emoji} Buy ${item.name} (Cost: ${item.cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${index}">0</span></button>`).join("")}
+      ${
+  availableItems.map((item, index) =>
+    `<button id="upgrade-${index}" class="upgrade-btn upgrade-btn-${index}" disabled>${item.emoji} Buy ${item.name} (Cost: ${item.cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${index}">0</span></button>`
+  ).join("")
+}
     </div>
   </div>
 `;
