@@ -356,7 +356,8 @@ upgradeButtonC.addEventListener("click", () => {
 button.addEventListener("click", () => {
   counter++;
   updateDisplay();
-  
+
+  // Add click animation
   button.classList.add("clicked");
   setTimeout(() => {
     button.classList.remove("clicked");
