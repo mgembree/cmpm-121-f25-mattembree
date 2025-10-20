@@ -13,12 +13,50 @@ interface Item {
   cost: number;
   rate: number;
   emoji: string;
+  description: string;
 }
 
 const availableItems: Item[] = [
-  { name: "Lily Pad", cost: 10, rate: 0.1, emoji: "🪷" },
-  { name: "Bug Swarm", cost: 100, rate: 2, emoji: "🦟" },
-  { name: "Frog Pond", cost: 1000, rate: 50, emoji: "🏞️" },
+  {
+    name: "Lily Pad",
+    cost: 10,
+    rate: 0.1,
+    emoji: "🪷",
+    description:
+      "A cozy floating platform where frogs rest and spawn tadpoles leisurely adds 0.1 Frogs Per Second",
+  },
+  {
+    name: "Bug Swarm",
+    cost: 100,
+    rate: 2,
+    emoji: "🦟",
+    description:
+      "Delicious flying snacks that keep frogs well-fed and productive adds 2 Frogs Per Second",
+  },
+  {
+    name: "Frog Pond",
+    cost: 1000,
+    rate: 50,
+    emoji: "🏞️",
+    description:
+      "A complete aquatic ecosystem teeming with amphibian life adds 50 Frogs Per Second",
+  },
+  {
+    name: "Cattail Forest",
+    cost: 10000,
+    rate: 200,
+    emoji: "🌾",
+    description:
+      "Dense wetland vegetation providing perfect cover for massive frog colonies adds 200 Frogs Per Second",
+  },
+  {
+    name: "Frog University",
+    cost: 100000,
+    rate: 1000,
+    emoji: "🎓",
+    description:
+      "Higher education for amphibians, teaching advanced tadpole production techniques adds 1000 Frogs Per Second!",
+  },
 ];
 
 const purchaseCounts: number[] = new Array(availableItems.length).fill(0);
@@ -200,6 +238,42 @@ document.body.innerHTML = `
       background: linear-gradient(45deg, #008b8b, #20b2aa);
     }
     
+    .upgrade-btn-3:not(:disabled) {
+      background: linear-gradient(45deg, #daa520, #ffd700);
+      border-color: #b8860b;
+    }
+    
+    .upgrade-btn-3:hover:not(:disabled) {
+      background: linear-gradient(45deg, #b8860b, #daa520);
+    }
+    
+    .upgrade-btn-4:not(:disabled) {
+      background: linear-gradient(45deg, #9370db, #ba55d3);
+      border-color: #8a2be2;
+    }
+    
+    .upgrade-btn-4:hover:not(:disabled) {
+      background: linear-gradient(45deg, #8a2be2, #9370db);
+    }
+    
+    .upgrade-btn-3:not(:disabled) {
+      background: linear-gradient(45deg, #daa520, #ffd700);
+      border-color: #b8860b;
+    }
+    
+    .upgrade-btn-3:hover:not(:disabled) {
+      background: linear-gradient(45deg, #b8860b, #daa520);
+    }
+    
+    .upgrade-btn-4:not(:disabled) {
+      background: linear-gradient(45deg, #9370db, #ba55d3);
+      border-color: #8a2be2;
+    }
+    
+    .upgrade-btn-4:hover:not(:disabled) {
+      background: linear-gradient(45deg, #8a2be2, #9370db);
+    }
+    
     /* Responsive design */
     @media (max-width: 600px) {
       .game-container {
@@ -285,6 +359,9 @@ function updateDisplay() {
     // Update button text with current cost
     upgradeButtons[i].innerHTML =
       `${item.emoji} Buy ${item.name} (Cost: ${cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${i}">${purchaseCount}</span>`;
+
+    // Add description as tooltip
+    upgradeButtons[i].title = item.description;
 
     // Update button availability
     upgradeButtons[i].disabled = counter < cost;
