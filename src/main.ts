@@ -12,6 +12,12 @@ let upgradeA_count: number = 0;
 let upgradeB_count: number = 0;
 let upgradeC_count: number = 0;
 
+// Base costs for upgrades
+const upgradeA_baseCost: number = 10;
+const upgradeB_baseCost: number = 100;
+const upgradeC_baseCost: number = 1000;
+const priceIncreaseFactor: number = 1.15;
+
 // Add HTML structure
 document.body.innerHTML = `
   <div class="game-container">
@@ -55,9 +61,25 @@ function updateDisplay() {
   upgradeB_countElement.textContent = upgradeB_count.toString();
   upgradeC_countElement.textContent = upgradeC_count.toString();
 
-  upgradeButtonA.disabled = counter < 10;
-  upgradeButtonB.disabled = counter < 100;
-  upgradeButtonC.disabled = counter < 1000;
+  const upgradeA_cost = getUpgradeCost(upgradeA_baseCost, upgradeA_count);
+  const upgradeB_cost = getUpgradeCost(upgradeB_baseCost, upgradeB_count);
+  const upgradeC_cost = getUpgradeCost(upgradeC_baseCost, upgradeC_count);
+
+  upgradeButtonA.innerHTML =
+    `🚀 Buy Upgrade A (Cost: ${upgradeA_cost} frogs) 🚀<br>Owned: <span id="countA">${upgradeA_count}</span>`;
+  upgradeButtonB.innerHTML =
+    `🚀 Buy Upgrade B (Cost: ${upgradeB_cost} frogs) 🚀<br>Owned: <span id="countB">${upgradeB_count}</span>`;
+  upgradeButtonC.innerHTML =
+    `🚀 Buy Upgrade C (Cost: ${upgradeC_cost} frogs) 🚀<br>Owned: <span id="countC">${upgradeC_count}</span>`;
+
+  upgradeButtonA.disabled = counter < upgradeA_baseCost;
+  upgradeButtonB.disabled = counter < upgradeB_baseCost;
+  upgradeButtonC.disabled = counter < upgradeC_baseCost;
+}
+
+//Step 7 - Dynamic pricing function
+function getUpgradeCost(baseCost: number, purchaseCount: number): number {
+  return Math.round(baseCost * Math.pow(priceIncreaseFactor, purchaseCount));
 }
 
 //Step 4 - Animation function using requestAnimationFrame
@@ -80,7 +102,8 @@ function animate(currentTime: number) {
 //Step 5 - Auto clicker Upgrade Button
 //Step 6 - Generalize upgrade system -- 10 frogs for 0.1 fps || 100 frogs for 2 fps || 1000 frogs for 50 fps
 upgradeButtonA.addEventListener("click", () => {
-  if (counter >= 10) {
+  const cost = getUpgradeCost(upgradeA_baseCost, upgradeA_count);
+  if (counter >= cost) {
     counter -= 10;
     frogps += 0.1;
     frogps = Math.round(frogps * 10) / 10; // Fix floating point precision
@@ -95,7 +118,8 @@ upgradeButtonA.addEventListener("click", () => {
 });
 
 upgradeButtonB.addEventListener("click", () => {
-  if (counter >= 100) {
+  const cost = getUpgradeCost(upgradeB_baseCost, upgradeB_count);
+  if (counter >= cost) {
     counter -= 100;
     frogps += 2;
     upgradeB_count++; // Increment purchase counter
@@ -109,7 +133,8 @@ upgradeButtonB.addEventListener("click", () => {
 });
 
 upgradeButtonC.addEventListener("click", () => {
-  if (counter >= 1000) {
+  const cost = getUpgradeCost(upgradeC_baseCost, upgradeC_count);
+  if (counter >= cost) {
     counter -= 1000;
     frogps += 50;
     upgradeC_count++; // Increment purchase counter
