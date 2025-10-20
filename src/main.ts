@@ -43,18 +43,18 @@ const upgradeButtonC = document.getElementById(
 // Purchase counter elements
 const upgradeA_countElement = document.getElementById("countA")!;
 const upgradeB_countElement = document.getElementById("countB")!;
-const upgradeC_countElement = document.getElementById("countC")!
+const upgradeC_countElement = document.getElementById("countC")!;
 
 // Function to update counters and buttons
 function updateDisplay() {
   counterElement.textContent = counter.toFixed(2);
   fpsElement.textContent = frogps.toFixed(1); // Fixed floating point precision
-  
+
   // Update purchase counters
   upgradeA_countElement.textContent = upgradeA_count.toString();
   upgradeB_countElement.textContent = upgradeB_count.toString();
   upgradeC_countElement.textContent = upgradeC_count.toString();
-  
+
   upgradeButtonA.disabled = counter < 10;
   upgradeButtonB.disabled = counter < 100;
   upgradeButtonC.disabled = counter < 1000;
@@ -78,7 +78,7 @@ function animate(currentTime: number) {
 }
 
 //Step 5 - Auto clicker Upgrade Button
-//Step 6 - Generalize upgrade system -- 10 frogs for 0.1 fps || 100 frogs for 2 fps || 1000 frogs for 50 fps 
+//Step 6 - Generalize upgrade system -- 10 frogs for 0.1 fps || 100 frogs for 2 fps || 1000 frogs for 50 fps
 upgradeButtonA.addEventListener("click", () => {
   if (counter >= 10) {
     counter -= 10;
