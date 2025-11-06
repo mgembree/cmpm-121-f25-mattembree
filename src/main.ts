@@ -2,11 +2,13 @@
 // Frog Clicker Game
 
 // deno-lint-ignore prefer-const
+// Game State
 let counter: number = 0;
 let frogps: number = 0;
 let lastTime: number = 0;
 let animationId: number | null = null;
 
+// Items / Shop Data
 // Item interface
 interface Item {
   name: string;
@@ -63,6 +65,7 @@ const purchaseCounts: number[] = new Array(availableItems.length).fill(0);
 
 const priceIncreaseFactor: number = 1.15;
 
+// UI Markup (HTML + CSS)
 // Add HTML structure with embedded CSS
 document.body.innerHTML = `
   <style>
@@ -320,7 +323,7 @@ document.body.innerHTML = `
   </div>
 `;
 
-// Button Handlers
+// DOM Elements
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
 const fpsElement = document.getElementById("fps")!;
@@ -336,11 +339,13 @@ for (let i = 0; i < availableItems.length; i++) {
   countElements.push(document.getElementById(`count-${i}`)!);
 }
 
+// Utility Functions
 // Dynamic pricing function
 function getUpgradeCost(baseCost: number, purchaseCount: number): number {
   return Math.round(baseCost * Math.pow(priceIncreaseFactor, purchaseCount));
 }
 
+// Update Functions
 // Function to update counters and buttons
 function updateDisplay() {
   counterElement.textContent = counter.toFixed(2);
@@ -368,7 +373,8 @@ function updateDisplay() {
   }
 }
 
-//Step 4 - Animation function using requestAnimationFrame
+// Animation Loop
+// Step 4 - Animation function using requestAnimationFrame
 function animate(currentTime: number) {
   if (frogps > 0) {
     const deltaTime = currentTime - lastTime;
@@ -383,7 +389,8 @@ function animate(currentTime: number) {
   animationId = requestAnimationFrame(animate);
 }
 
-//Step 8 - Data-driven upgrade system using loops
+// Event Listeners
+// Step 8 - Data-driven upgrade system using loops
 // Add event listeners for all upgrade buttons using loops
 for (let i = 0; i < availableItems.length; i++) {
   upgradeButtons[i].addEventListener("click", () => {
