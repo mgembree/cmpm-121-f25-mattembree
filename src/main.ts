@@ -3,8 +3,8 @@
 
 // deno-lint-ignore prefer-const
 // Game State
-let counter: number = 0;
-let frogps: number = 0;
+let resource: number = 0;
+let perSecond: number = 0;
 let lastTime: number = 0;
 let animationId: number | null = null;
 
@@ -18,7 +18,7 @@ interface Item {
   description: string;
 }
 
-const availableItems: Item[] = [
+const items: Item[] = [
   {
     name: "Lily Pad",
     cost: 10,
@@ -61,7 +61,7 @@ const availableItems: Item[] = [
   },
 ];
 
-const purchaseCounts: number[] = new Array(availableItems.length).fill(0);
+const itemCounts: number[] = new Array(items.length).fill(0);
 
 const priceIncreaseFactor: number = 1.15;
 
@@ -315,7 +315,7 @@ document.body.innerHTML = `
     <div class="button-container">
       <button id="increment">🐸</button>
       ${
-  availableItems.map((item, index) =>
+  items.map((item, index) =>
     `<button id="upgrade-${index}" class="upgrade-btn upgrade-btn-${index}" disabled>${item.emoji} Buy ${item.name} (Cost: ${item.cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${index}">0</span></button>`
   ).join("")
 }
@@ -332,7 +332,7 @@ const fpsElement = document.getElementById("fps")!;
 const upgradeButtons: HTMLButtonElement[] = [];
 const countElements: HTMLElement[] = [];
 
-for (let i = 0; i < availableItems.length; i++) {
+for (let i = 0; i < items.length; i++) {
   upgradeButtons.push(
     document.getElementById(`upgrade-${i}`)! as HTMLButtonElement,
   );
@@ -348,14 +348,14 @@ function getUpgradeCost(baseCost: number, purchaseCount: number): number {
 // Update Functions
 // Function to update counters and buttons
 function updateDisplay() {
-  counterElement.textContent = counter.toFixed(2);
-  frogps = Math.round(frogps * 10) / 10; // Fix floating point precision
-  fpsElement.textContent = frogps.toFixed(1);
+  counterElement.textContent = resource.toFixed(2);
+  perSecond = Math.round(perSecond * 10) / 10; // Fix floating point precision
+  fpsElement.textContent = perSecond.toFixed(1);
 
   // Update all items using loop
-  for (let i = 0; i < availableItems.length; i++) {
-    const item = availableItems[i];
-    const purchaseCount = purchaseCounts[i];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const purchaseCount = itemCounts[i];
     const cost = getUpgradeCost(item.cost, purchaseCount);
 
     // Update purchase counter display
@@ -369,19 +369,19 @@ function updateDisplay() {
     upgradeButtons[i].title = item.description;
 
     // Update button availability
-    upgradeButtons[i].disabled = counter < cost;
+    upgradeButtons[i].disabled = resource < cost;
   }
 }
 
 // Animation Loop
 // Step 4 - Animation function using requestAnimationFrame
 function animate(currentTime: number) {
-  if (frogps > 0) {
+  if (perSecond > 0) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    const increment = (frogps * deltaTime) / 1000;
-    counter += increment;
+    const increment = (perSecond * deltaTime) / 1000;
+    resource += increment;
 
     updateDisplay();
   }
@@ -391,15 +391,15 @@ function animate(currentTime: number) {
 
 // Event Listeners
 // Step 8 - Data-driven upgrade system using loops
-for (let i = 0; i < availableItems.length; i++) {
+for (let i = 0; i < items.length; i++) {
   upgradeButtons[i].addEventListener("click", () => {
-    const item = availableItems[i];
-    const cost = getUpgradeCost(item.cost, purchaseCounts[i]);
+    const item = items[i];
+    const cost = getUpgradeCost(item.cost, itemCounts[i]);
 
-    if (counter >= cost) {
-      counter -= cost;
-      frogps += item.rate;
-      purchaseCounts[i]++;
+    if (resource >= cost) {
+      resource -= cost;
+      perSecond += item.rate;
+      itemCounts[i]++;
       updateDisplay();
 
       if (!animationId) {
@@ -412,7 +412,7 @@ for (let i = 0; i < availableItems.length; i++) {
 
 //Step 1|2 - Default Clicker Button with animation
 button.addEventListener("click", () => {
-  counter++;
+  resource++;
   updateDisplay();
 
   // Add click animation
