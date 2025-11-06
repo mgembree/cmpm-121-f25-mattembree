@@ -391,7 +391,6 @@ function animate(currentTime: number) {
 
 // Event Listeners
 // Step 8 - Data-driven upgrade system using loops
-// Add event listeners for all upgrade buttons using loops
 for (let i = 0; i < availableItems.length; i++) {
   upgradeButtons[i].addEventListener("click", () => {
     const item = availableItems[i];
