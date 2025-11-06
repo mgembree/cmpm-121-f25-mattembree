@@ -93,10 +93,67 @@ document.body.innerHTML = `
       padding: 30px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       text-align: center;
-      max-width: 600px;
+      max-width: 900px;
       width: 100%;
       border: 3px solid #228b22;
       position: relative;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .content {
+      flex: 1;
+      text-align: center;
+    }
+
+    //Sidebar Inspired by https://riyer4.github.io/cmpm-121-f25-Ria-Iyer-D1/ Demo 
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(180deg, rgba(144,238,144,0.15), rgba(144,238,144,0.05));
+      border-radius: 12px;
+      padding: 12px;
+      border: 2px solid rgba(144,238,144,0.4);
+      text-align: left;
+      color: #2e8b57;
+    }
+
+    .sidebar h3 {
+      margin-bottom: 8px;
+      text-align: center;
+      color: #2e8b57;
+    }
+
+    .inv-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.04);
+      font-weight: 600;
+    }
+
+    .inv-count {
+      background: rgba(46,139,87,0.1);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    //Audio inspired by https://benho612.github.io/CMPM1212-D1-Assignement/ 's demo for adding audio to game.
+    .audio-toggle {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+    }
+    .audio-toggle[aria-pressed="true"] {
+      background: rgba(46,139,87,0.12);
     }
     
     /* Title */
@@ -311,25 +368,90 @@ document.body.innerHTML = `
     }
   </style>
   <div class="game-container">
-    <h1>🐸 Frog Clicker 🐸</h1>
-    <p>🐸 Frogs: <span id="count">0</span> || Frogs Per Second: <span id="fps">0</span> 🐸</p>
-    <div class="button-container">
-      <button id="increment">🐸</button>
-      ${
+    <div class="content">
+      <h1>🐸 Frog Clicker 🐸</h1>
+      <p>🐸 Frogs: <span id="count">0</span> || Frogs Per Second: <span id="fps">0</span> 🐸</p>
+      <div class="button-container">
+        <button id="increment">🐸</button>
+        ${
   items.map((item, index) =>
     `<button id="upgrade-${index}" class="upgrade-btn upgrade-btn-${index}" disabled>${item.emoji} Buy ${item.name} (Cost: ${item.cost} Frogs) ${item.emoji}<br>Owned: <span id="count-${index}">0</span></button>`
   ).join("")
 }
+      </div>
     </div>
+    <aside class="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <h3 style="margin:0">Inventory</h3>
+        <button id="audio-toggle" class="audio-toggle" aria-pressed="false" title="Toggle background audio">🔈</button>
+      </div>
+      <div id="inventory" aria-live="polite"></div>
+      <audio id="bg-audio" src="./src/swampAmbience.mp3" loop preload="auto"></audio>
+    </aside>
   </div>
 `;
 
-// DOM Elements - buttons and counters
+// DOM Elements
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
 const fpsElement = document.getElementById("fps")!;
+const inventoryElement = document.getElementById("inventory")!;
+const audioElement = document.getElementById("bg-audio") as HTMLAudioElement;
+const audioToggle = document.getElementById(
+  "audio-toggle",
+) as HTMLButtonElement;
 
-// Get all upgrade buttons and count elements dynamically
+let audioStarted = false;
+
+// Background audio defaults
+if (audioElement) {
+  audioElement.volume = 0.245;
+  audioElement.muted = false; // attempt to play unmuted by default
+  audioElement.play().then(() => {
+    audioStarted = true;
+    if (audioToggle) {
+      audioToggle.setAttribute("aria-pressed", "true");
+      audioToggle.textContent = "🔊";
+    }
+  }).catch(() => {
+    audioElement.muted = true;
+    if (audioToggle) {
+      audioToggle.setAttribute("aria-pressed", "false");
+      audioToggle.textContent = "🔈";
+    }
+  });
+}
+
+function ensureAudioPlaying() {
+  if (!audioElement) return;
+  if (audioStarted) return;
+  // Try to play; will succeed if called after a user gesture
+  audioElement.play().then(() => {
+    audioStarted = true;
+  }).catch(() => {
+  });
+}
+
+// Toggle button behavior
+if (audioToggle) {
+  audioToggle.addEventListener("click", () => {
+    const pressed = audioToggle.getAttribute("aria-pressed") === "true";
+    if (pressed) {
+      audioToggle.setAttribute("aria-pressed", "false");
+      audioToggle.textContent = "🔈";
+      if (audioElement) audioElement.muted = true;
+    } else {
+      audioToggle.setAttribute("aria-pressed", "true");
+      audioToggle.textContent = "🔊";
+      if (audioElement) {
+        audioElement.muted = false;
+        ensureAudioPlaying();
+      }
+    }
+  });
+}
+
+// Get all upgrade buttons and per-item count elements dynamically
 const upgradeButtons: HTMLButtonElement[] = [];
 const countElements: HTMLElement[] = [];
 
@@ -372,6 +494,16 @@ function updateDisplay() {
     // Update button availability
     upgradeButtons[i].disabled = resource < cost;
   }
+
+  // Update inventory sidebar (emoji, title, count)
+  if (inventoryElement) {
+    inventoryElement.innerHTML = items.map((item, idx) =>
+      `<div class="inv-item">` +
+      `<span class="inv-label">${item.emoji} ${item.name}</span>` +
+      `<span class="inv-count">${itemCounts[idx]}</span>` +
+      `</div>`
+    ).join("");
+  }
 }
 
 // Animation Loop
@@ -403,6 +535,9 @@ for (let i = 0; i < items.length; i++) {
       itemCounts[i]++;
       updateDisplay();
 
+      // Start audio if needed after a user gesture
+      ensureAudioPlaying();
+
       if (!animationId) {
         lastTime = performance.now();
         animationId = requestAnimationFrame(animate);
@@ -415,6 +550,8 @@ for (let i = 0; i < items.length; i++) {
 button.addEventListener("click", () => {
   resource++;
   updateDisplay();
+  // Start audio if needed after a user gesture
+  ensureAudioPlaying();
 
   // Add click animation
   button.classList.add("clicked");
