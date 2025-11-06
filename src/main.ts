@@ -2,13 +2,6 @@
 // Frog Clicker Game
 
 // deno-lint-ignore prefer-const
-// Game State
-let resource: number = 0;
-let perSecond: number = 0;
-let lastTime: number = 0;
-let animationId: number | null = null;
-
-// Items / Shop Data
 // Item interface
 interface Item {
   name: string;
@@ -17,6 +10,14 @@ interface Item {
   emoji: string;
   description: string;
 }
+
+// Game State
+let resource: number = 0;
+let perSecond: number = 0;
+let lastTime: number = 0;
+let animationId: number | null = null;
+
+// Items / Shop Data
 
 const items: Item[] = [
   {
