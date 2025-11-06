@@ -323,7 +323,7 @@ document.body.innerHTML = `
   </div>
 `;
 
-// DOM Elements
+// DOM Elements - buttons and counters
 const button = document.getElementById("increment")!;
 const counterElement = document.getElementById("count")!;
 const fpsElement = document.getElementById("fps")!;
